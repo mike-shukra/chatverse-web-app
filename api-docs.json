@@ -1,0 +1,1172 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "chat verse app API",
+        "description": "chat verse application",
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://springdoc.org"
+        },
+        "version": "v0.0.1"
+    },
+    "externalDocs": {
+        "description": "My Wiki Documentation"
+    },
+    "servers": [
+        {
+            "url": "http://chatverse.local:8888",
+            "description": "Development server (via port-forward/NodePort)"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Contacts",
+            "description": "API для управления контактами пользователей"
+        },
+        {
+            "name": "Chat",
+            "description": "API для управления чат-сообщениями"
+        }
+    ],
+    "paths": {
+        "/api/v1/users/me": {
+            "get": {
+                "tags": [
+                    "user-controller"
+                ],
+                "summary": "Получение текущего пользователя",
+                "description": "Возвращает профиль текущего пользователя. ID пользователя извлекается из токена аутентификации.",
+                "operationId": "getCurrentUser",
+                "responses": {
+                    "200": {
+                        "description": "Профиль успешно получен.",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserProfileResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Не аутентифицирован / Невалидный токен.",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Пользователь, ассоциированный с токеном, не найден.",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный идентификатор пользователя в токене.",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer-key": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "user-controller"
+                ],
+                "summary": "Обновление профиля пользователя",
+                "description": "Обновляет данные профиля пользователя.",
+                "operationId": "updateUser",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserUpdateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Профиль успешно обновлён.",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserUpdateResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Пользователь не найден.",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer-key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/contacts/requests/{requesterId}": {
+            "put": {
+                "tags": [
+                    "Contacts"
+                ],
+                "summary": "Принять или отклонить входящий запрос на добавление в контакты",
+                "operationId": "updateContactRequestStatus",
+                "parameters": [
+                    {
+                        "name": "requesterId",
+                        "in": "path",
+                        "description": "ID пользователя, отправившего запрос",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateContactStatusRequestDto"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Статус запроса успешно обновлен"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer-key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/send-auth-code": {
+            "post": {
+                "tags": [
+                    "user-controller"
+                ],
+                "summary": "Отправка кода авторизации",
+                "description": "Отправляет код авторизации на указанный номер телефона.",
+                "operationId": "sendAuthCode",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SendAuthCodeRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Код успешно отправлен.",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный номер телефона.",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/register": {
+            "post": {
+                "tags": [
+                    "user-controller"
+                ],
+                "summary": "Регистрация пользователя",
+                "description": "Создаёт нового пользователя и возвращает токены.",
+                "operationId": "register",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterIn"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Пользователь успешно зарегистрирован.",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные запроса.",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer-key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/refresh-token": {
+            "post": {
+                "tags": [
+                    "user-controller"
+                ],
+                "summary": "Обновление токена",
+                "description": "Обновляет access и refresh токены.",
+                "operationId": "refreshToken",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RefreshTokenRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "400": {
+                        "description": "Некорректный refresh токен.",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "Токены успешно обновлены.",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TokenResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/logout": {
+            "post": {
+                "tags": [
+                    "user-controller"
+                ],
+                "summary": "Выход пользователя",
+                "description": "Устанавливает пользователя в статус offline.",
+                "operationId": "logoutUser",
+                "responses": {
+                    "404": {
+                        "description": "Пользователь не найден.",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "Пользователь успешно вышел."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer-key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/check-auth-code": {
+            "post": {
+                "tags": [
+                    "user-controller"
+                ],
+                "summary": "Проверка кода авторизации",
+                "description": "Проверяет код авторизации и возвращает токены.",
+                "operationId": "checkAuthCode",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CheckAuthCodeRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Код успешно проверен.",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LoginResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный код авторизации.",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/contacts/requests": {
+            "post": {
+                "tags": [
+                    "Contacts"
+                ],
+                "summary": "Отправить запрос на добавление в контакты",
+                "operationId": "sendContactRequest",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SendContactRequestDto"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Запрос успешно отправлен"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer-key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/chat/messages": {
+            "post": {
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Отправить сообщение",
+                "description": "Отправляет сообщение указанному получателю.",
+                "operationId": "sendMessage",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SendMessageRequestDto"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Сообщение успешно отправлено в очередь."
+                    },
+                    "400": {
+                        "description": "Некорректные данные запроса (например, не указан получатель или контент)."
+                    },
+                    "401": {
+                        "description": "Пользователь не аутентифицирован."
+                    },
+                    "404": {
+                        "description": "Получатель не найден."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer-key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/{userId}/online": {
+            "get": {
+                "tags": [
+                    "user-controller"
+                ],
+                "summary": "Проверка активности пользователя",
+                "description": "Проверяет, находится ли пользователь в статусе online.",
+                "operationId": "isUserOnline",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Проверка успешна.",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Пользователь не найден.",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer-key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/check-jwt": {
+            "get": {
+                "tags": [
+                    "user-controller"
+                ],
+                "summary": "Проверка JWT",
+                "description": "Проверяет валидность JWT. Доступен только для аутентифицированных пользователей.",
+                "operationId": "checkJwt",
+                "responses": {
+                    "401": {
+                        "description": "Не аутентифицирован (токен не предоставлен или не валиден).",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "Токен валиден (пользователь аутентифицирован).",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SuccessResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer-key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/contacts": {
+            "get": {
+                "tags": [
+                    "Contacts"
+                ],
+                "summary": "Получить список своих контактов",
+                "operationId": "getContacts",
+                "responses": {
+                    "200": {
+                        "description": "Список контактов успешно получен",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ContactResponseDto"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer-key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/contacts/requests/pending": {
+            "get": {
+                "tags": [
+                    "Contacts"
+                ],
+                "summary": "Получить список ожидающих запросов на добавление в контакты",
+                "operationId": "getPendingRequests",
+                "parameters": [
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "Тип запросов: INCOMING или OUTGOING",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "INCOMING"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список запросов успешно получен",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/PendingRequestResponseDto"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer-key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/chat/messages/{roomId}": {
+            "get": {
+                "tags": [
+                    "Chat"
+                ],
+                "summary": "Получить историю сообщений",
+                "description": "Возвращает историю сообщений для указанной комнаты чата.",
+                "operationId": "getMessageHistory",
+                "parameters": [
+                    {
+                        "name": "roomId",
+                        "in": "path",
+                        "description": "ID комнаты чата (например, '1_2')",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "401": {
+                        "description": "Пользователь не аутентифицирован.",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ChatMessage"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "У пользователя нет доступа к этой комнате.",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ChatMessage"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "История сообщений успешно получена.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChatMessage"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer-key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/{userId}": {
+            "delete": {
+                "tags": [
+                    "user-controller"
+                ],
+                "summary": "Удаление пользователя",
+                "description": "Удаляет пользователя по ID.",
+                "operationId": "deleteUser",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Пользователь успешно удалён."
+                    },
+                    "404": {
+                        "description": "Пользователь не найден.",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer-key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/contacts/{contactUserId}": {
+            "delete": {
+                "tags": [
+                    "Contacts"
+                ],
+                "summary": "Удалить пользователя из списка контактов",
+                "operationId": "removeContact",
+                "parameters": [
+                    {
+                        "name": "contactUserId",
+                        "in": "path",
+                        "description": "ID пользователя, которого нужно удалить из контактов",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Контакт успешно удален"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer-key": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "UploadImage": {
+                "type": "object",
+                "properties": {
+                    "filename": {
+                        "type": "string",
+                        "description": "Имя файла изображения"
+                    },
+                    "base_64": {
+                        "type": "string",
+                        "description": "Base64-кодированное содержимое изображения"
+                    }
+                },
+                "description": "Аватар пользователя"
+            },
+            "UserUpdateRequest": {
+                "required": [
+                    "name",
+                    "username"
+                ],
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Имя пользователя"
+                    },
+                    "username": {
+                        "type": "string",
+                        "description": "Username пользователя"
+                    },
+                    "birthday": {
+                        "type": "string",
+                        "description": "Дата рождения пользователя"
+                    },
+                    "city": {
+                        "type": "string",
+                        "description": "Город проживания пользователя"
+                    },
+                    "vk": {
+                        "type": "string",
+                        "description": "Ссылка на профиль VK пользователя"
+                    },
+                    "instagram": {
+                        "type": "string",
+                        "description": "Ссылка на профиль Instagram пользователя"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Статус пользователя"
+                    },
+                    "avatar": {
+                        "$ref": "#/components/schemas/UploadImage"
+                    }
+                }
+            },
+            "Avatars": {
+                "type": "object",
+                "properties": {
+                    "avatar": {
+                        "type": "string",
+                        "description": "URL основного аватара"
+                    },
+                    "bigAvatar": {
+                        "type": "string",
+                        "description": "URL большого аватара"
+                    },
+                    "miniAvatar": {
+                        "type": "string",
+                        "description": "URL миниатюры аватара"
+                    }
+                },
+                "description": "Аватары пользователя в различных размерах"
+            },
+            "UserUpdateResponse": {
+                "type": "object",
+                "properties": {
+                    "avatars": {
+                        "$ref": "#/components/schemas/Avatars"
+                    }
+                }
+            },
+            "ErrorResponse": {
+                "type": "object",
+                "properties": {
+                    "timestamp": {
+                        "type": "string",
+                        "description": "Метка времени ошибки",
+                        "example": "2024-12-30T10:00:00"
+                    },
+                    "status": {
+                        "type": "integer",
+                        "description": "HTTP-статус ошибки",
+                        "format": "int32",
+                        "example": 400
+                    },
+                    "error": {
+                        "type": "string",
+                        "description": "Краткое описание ошибки",
+                        "example": "Bad Request"
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "Сообщение об ошибке",
+                        "example": "Phone number is required"
+                    },
+                    "path": {
+                        "type": "string",
+                        "description": "Путь запроса, где произошла ошибка",
+                        "example": "/api/v1/users/register"
+                    }
+                },
+                "description": "Формат ответа в случае ошибки"
+            },
+            "UpdateContactStatusRequestDto": {
+                "required": [
+                    "newStatus"
+                ],
+                "type": "object",
+                "properties": {
+                    "newStatus": {
+                        "type": "string",
+                        "enum": [
+                            "PENDING",
+                            "ACCEPTED",
+                            "DECLINED",
+                            "BLOCKED"
+                        ]
+                    }
+                }
+            },
+            "SendAuthCodeRequest": {
+                "required": [
+                    "phone"
+                ],
+                "type": "object",
+                "properties": {
+                    "phone": {
+                        "maxLength": 30,
+                        "minLength": 0,
+                        "type": "string",
+                        "description": "Номер телефона для отправки кода"
+                    }
+                }
+            },
+            "SuccessResponse": {
+                "type": "object",
+                "properties": {
+                    "success": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "RegisterIn": {
+                "required": [
+                    "name",
+                    "phone",
+                    "username"
+                ],
+                "type": "object",
+                "properties": {
+                    "phone": {
+                        "type": "string"
+                    },
+                    "username": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                }
+            },
+            "TokenResponse": {
+                "type": "object",
+                "properties": {
+                    "refreshToken": {
+                        "type": "string",
+                        "description": "Refresh токен пользователя"
+                    },
+                    "accessToken": {
+                        "type": "string",
+                        "description": "Access токен пользователя"
+                    },
+                    "userId": {
+                        "type": "integer",
+                        "description": "ID пользователя",
+                        "format": "int64"
+                    }
+                }
+            },
+            "RefreshTokenRequest": {
+                "required": [
+                    "refreshToken"
+                ],
+                "type": "object",
+                "properties": {
+                    "refreshToken": {
+                        "type": "string",
+                        "description": "Refresh токен для обновления access токена"
+                    }
+                }
+            },
+            "CheckAuthCodeRequest": {
+                "required": [
+                    "code",
+                    "phone"
+                ],
+                "type": "object",
+                "properties": {
+                    "phone": {
+                        "type": "string",
+                        "description": "Номер телефона пользователя"
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Код аутентификации"
+                    }
+                }
+            },
+            "LoginResponse": {
+                "type": "object",
+                "properties": {
+                    "refreshToken": {
+                        "type": "string",
+                        "description": "Refresh токен пользователя"
+                    },
+                    "accessToken": {
+                        "type": "string",
+                        "description": "Access токен пользователя"
+                    },
+                    "userId": {
+                        "type": "integer",
+                        "description": "ID пользователя",
+                        "format": "int64"
+                    },
+                    "userExists": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "SendContactRequestDto": {
+                "required": [
+                    "targetUserId"
+                ],
+                "type": "object",
+                "properties": {
+                    "targetUserId": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                }
+            },
+            "SendMessageRequestDto": {
+                "type": "object",
+                "properties": {
+                    "recipientId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "content": {
+                        "type": "string"
+                    }
+                },
+                "description": "Данные сообщения (требуются recipientId и content)"
+            },
+            "UserProfileResponse": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Имя пользователя"
+                    },
+                    "username": {
+                        "type": "string",
+                        "description": "Username пользователя"
+                    },
+                    "birthday": {
+                        "type": "string",
+                        "description": "Дата рождения пользователя",
+                        "example": "1990-01-01"
+                    },
+                    "city": {
+                        "type": "string",
+                        "description": "Город проживания пользователя"
+                    },
+                    "vk": {
+                        "type": "string",
+                        "description": "Ссылка на профиль VK пользователя"
+                    },
+                    "instagram": {
+                        "type": "string",
+                        "description": "Ссылка на профиль Instagram пользователя"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Статус пользователя"
+                    },
+                    "avatar": {
+                        "type": "string",
+                        "description": "URL аватара пользователя"
+                    },
+                    "id": {
+                        "type": "integer",
+                        "description": "ID пользователя",
+                        "format": "int64"
+                    },
+                    "last": {
+                        "type": "string",
+                        "description": "Последний визит пользователя",
+                        "example": "2024-12-30T10:00:00"
+                    },
+                    "online": {
+                        "type": "boolean",
+                        "description": "Флаг, указывающий на онлайн-статус пользователя"
+                    },
+                    "created": {
+                        "type": "string",
+                        "description": "Дата создания профиля пользователя",
+                        "example": "2024-12-30T10:00:00"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "description": "Номер телефона пользователя"
+                    },
+                    "avatars": {
+                        "$ref": "#/components/schemas/Avatars"
+                    }
+                }
+            },
+            "ContactResponseDto": {
+                "type": "object",
+                "properties": {
+                    "userId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "username": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "online": {
+                        "type": "boolean"
+                    },
+                    "lastSeen": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "friendshipStatus": {
+                        "type": "string",
+                        "enum": [
+                            "PENDING",
+                            "ACCEPTED",
+                            "DECLINED",
+                            "BLOCKED"
+                        ]
+                    },
+                    "becameContactsAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "PendingRequestResponseDto": {
+                "type": "object",
+                "properties": {
+                    "contactEntityId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "otherUserId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "otherUserUsername": {
+                        "type": "string"
+                    },
+                    "otherUserName": {
+                        "type": "string"
+                    },
+                    "requestStatus": {
+                        "type": "string",
+                        "enum": [
+                            "PENDING",
+                            "ACCEPTED",
+                            "DECLINED",
+                            "BLOCKED"
+                        ]
+                    },
+                    "direction": {
+                        "type": "string"
+                    },
+                    "requestTimestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "ChatMessage": {
+                "type": "object",
+                "properties": {
+                    "messageId": {
+                        "type": "string"
+                    },
+                    "senderId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "recipientId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "roomId": {
+                        "type": "string"
+                    },
+                    "content": {
+                        "type": "string"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearer-key": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    }
+}

@@ -1,0 +1,186 @@
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  overflow: hidden; /* Предотвращаем прокрутку на body и html */
+}
+
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
+}
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden; /* Предотвращает двойные полосы прокрутки */
+}
+
+.sidebar {
+  width: 280px; /* Ширина боковой панели */
+  min-width: 280px;
+  background-color: #f7ac80; /* Светлый фон для боковой панели */
+  padding: 20px;
+  border-right: 1px solid #e0e0e0; /* Разделитель */
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.sidebar h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.chat-area {
+  flex-grow: 1; /* Занимает оставшееся пространство */
+  display: flex; /* Позволяет ChatWindow правильно растягиваться */
+  flex-direction: column;
+  background-color: #c5c3c3; /* Фон области чата */
+  overflow: hidden; /* Важно для корректной работы компонентов чата */
+  min-width: 520px;
+}
+.sidebar-scrollable-area {
+  flex-grow: 1; /* Занимает доступное пространство */
+  overflow-y: auto; /* Включает вертикальную прокрутку только при необходимости */
+  overflow-x: hidden; /* Отключает горизонтальную прокрутку */
+  margin-top: 15px; /* Отступ сверху */
+  margin-bottom: 15px; /* Отступ снизу */
+  padding-right: 5px; /* Небольшой отступ справа, чтобы скроллбар не прилипал к тексту */
+}
+
+.sidebar-logout-button {
+  margin-top: auto; /* Прижимает кнопку к низу flex-контейнера (.sidebar) */
+  width: 100%;
+}
+
+.sidebar-section {
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.sidebar-section:last-of-type {
+  border-bottom: none;
+}
+
+.sidebar-section h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #555;
+}
+
+.pending-request-item, .contact-item {
+  padding: 8px 5px;
+  margin-bottom: 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pending-request-item span, .contact-item span {
+  margin-bottom: 10px;
+  max-width: 190px;
+}
+.pending-request-item div{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.pending-request-item {
+  padding: 8px 5px;
+  margin-bottom: 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column; 
+  align-items: flex-start;
+  word-break: break-word;
+}
+
+.pending-request-item > .pending-request-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.pending-request-item button {
+  margin-left: 0;
+  padding: 3px 10px;
+  font-size: 0.9em;
+  min-width: 80px;
+}
+
+.pending-request-item:hover, .contact-item:hover {
+  background-color: #d93d3d;
+}
+
+.contact-item.active {
+  background-color: #7794f3; /* Цвет для активного контакта */
+  font-weight: bold;
+}
+
+.pending-request-item button, .remove-contact-btn {
+  margin-left: 5px;
+  padding: 3px 7px;
+  font-size: 0.8em;
+}
+
+.online-indicator {
+  color: green;
+  font-size: 0.9em;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+
+.chat-area .cs-message-input__content-editor-wrapper {
+  border-radius: 0;
+  max-width: 474px;
+  text-align: left;
+}
+
+.chat-area .cs-message__content-wrapper {
+  max-width: 474px;
+  text-align: left;
+}
