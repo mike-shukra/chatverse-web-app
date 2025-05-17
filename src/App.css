@@ -184,3 +184,26 @@ html, body, #root {
   max-width: 474px;
   text-align: left;
 }
+
+.add-contact-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  font-size: 1em;
+  background-color: #000000;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.add-contact-input:focus {
+  border-color: #d93d3d;
+  outline: none;
+  box-shadow: 0 0 0 2px #f7ac80;
+}
+
+.add-contact-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}

@@ -164,14 +164,16 @@ function App() {
 
             <div className="sidebar-section">
               <h4>Добавить контакт</h4>
-              <input
-                type="text"
-                placeholder="ID пользователя"
-                value={newContactIdInput}
-                onChange={(e) => setNewContactIdInput(e.target.value)}
-                style={{width: 'calc(100% - 10px)', marginBottom: '5px'}}
-              />
-              <button onClick={handleSendContactRequest} style={{width: '100%'}}>Отправить запрос</button>
+              <div className="add-contact-form">
+                <input
+                  type="text"
+                  className="add-contact-input"
+                  placeholder="ID пользователя"
+                  value={newContactIdInput}
+                  onChange={(e) => setNewContactIdInput(e.target.value)}
+                />
+                <button onClick={handleSendContactRequest}>Отправить</button>
+              </div>
             </div>
 
             <div className="sidebar-scrollable-area">
